@@ -20,7 +20,8 @@ $negative-color: #d54e21;
   &:hover, &:active{
     text-decoration: none;
   }
-
+  // アニメーション
+  @include transition(background-color .5s linear, color .5s linear, border-color .5s linear);
 }
 
 // 未使用時

@@ -8,7 +8,7 @@
     'use strict';
 
     // ボタンの初期値
-    var $btns;
+    var $btns, nonce = '';
 
     $(window).ready(function(){
         // DOM READYでボタンを取得
@@ -38,6 +38,8 @@
                             }
                         }
                     }
+                    // nonceを保存
+                    nonce = result.nonce;
                 }else{
                     // ログインしていないので、
                     // ボタンをログインに
@@ -49,9 +51,56 @@
         }
     });
 
+
     $(document).on('click', '.fs-btn', function(e){
-        if( $(this).hasClass('fs-disabled') ){
+        var $btn = $(this),
+            userId = $btn.attr('data-author-id');
+        if( $btn.hasClass('fs-disabled') ){
             e.preventDefault();
+        }else if( $btn.hasClass('fs-follow') ){
+            // フォローする
+            e.preventDefault();
+            // 一時停止
+            $btn.removeClass('fs-follow').addClass('fs-disabled');
+            // Ajax
+            $.post(Freundschaft.endpoint, {
+                action: Freundschaft.action_follow,
+                user_id: userId,
+                _wpnonce: nonce
+            }).done(function(result){
+                if( result.success ){
+                    // 成功
+                    $btn.removeClass('fs-disabled').addClass('fs-following')
+                }else{
+                    // 失敗
+                    $btn.removeClass('fs-disabled').addClass('fs-follow');
+                    alert(result.message);
+                }
+            }).fail(function(xhr, status, error){
+                $btn.removeClass('fs-disabled').addClass('fs-follow');
+            });
+        }else if( $btn.hasClass('fs-following') ){
+            // フォロー解除
+            e.preventDefault();
+            // 一時停止
+            $btn.removeClass('fs-following').addClass('fs-disabled');
+            // Ajax
+            $.post(Freundschaft.endpoint, {
+                action: Freundschaft.action_unfollow,
+                user_id: userId,
+                _wpnonce: nonce
+            }).done(function(result){
+                if( result.success ){
+                    // 成功
+                    $btn.removeClass('fs-disabled').addClass('fs-follow')
+                }else{
+                    // 失敗
+                    $btn.removeClass('fs-disabled').addClass('fs-following');
+                    alert(result.message);
+                }
+            }).fail(function(xhr, status, error){
+                $btn.removeClass('fs-disabled').addClass('fs-following');
+            });
         }
     });
 
