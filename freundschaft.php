@@ -76,7 +76,7 @@ function _freundschaft_logged_in(){
 	$users = array();
 	if( isset($_POST['author_ids']) && is_array($_POST['author_ids'])){
 		$author_ids = array_unique($_POST['author_ids']);
-		$result = Freundschaft\Model\Followers::getInstance()->getFollowStatus(get_current_user_id(), $author_ids);
+		$result = Freundschaft\Models\Followers::getInstance()->getFollowStatus(get_current_user_id(), $author_ids);
 		$users = array();
 		foreach( $result as $user_id => $bool ){
 			$users['user_'.$user_id] = $bool;
@@ -117,7 +117,7 @@ function _freundschaft_follow(){
 		if( !isset($_POST['user_id']) || !is_numeric($_POST['user_id']) ){
 			throw new Exception('ユーザーIDが指定されていません。', 500);
 		}
-		if( !Freundschaft\Model\Followers::getInstance()->follow(get_current_user_id(), $_POST['user_id']) ){
+		if( !Freundschaft\Models\Followers::getInstance()->follow(get_current_user_id(), $_POST['user_id']) ){
 			throw new Exception('すでにフォローしています。', 500);
 		}
 		$json = array(
@@ -148,7 +148,7 @@ function _freundschaft_unfollow(){
 		if( !isset($_POST['user_id']) || !is_numeric($_POST['user_id']) ){
 			throw new Exception('ユーザーIDが指定されていません。', 500);
 		}
-		if( !Freundschaft\Model\Followers::getInstance()->unfollow(get_current_user_id(), $_POST['user_id']) ){
+		if( !Freundschaft\Models\Followers::getInstance()->unfollow(get_current_user_id(), $_POST['user_id']) ){
 			throw new Exception('このユーザーをフォローしていません。', 500);
 		}
 		$json = array(
