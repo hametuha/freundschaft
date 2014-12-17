@@ -2,12 +2,15 @@
 
 namespace Freundschaft\Pattern;
 
+use Freundschaft\Util\String;
+
 /**
  * Abstract class of Model
  *
  * @package Freundschaft\Pattern
  * @property-read \wpdb $db
  * @property-read string $table
+ * @property-read \Freundschaft\Util\String $string
  * @method int query(string $query) Do $wpdb->query with prepared statement.
  * @method array get_results(string $query) Do $wpdb->get_result with prepared statement.
  * @method null|\stdClass get_row(string $query) Do $wpdb->get_result with prepared statement.
@@ -57,7 +60,7 @@ abstract class Model extends Singleton
 		// Set table name
 		if( empty($this->name) ){
 			$name = explode('\\', get_called_class());
-			$this->name = $this->decamelize($name[count($name) - 1]);
+			$this->name = $this->string->decamelize($name[count($name) - 1]);
 		}
 	}
 
@@ -214,6 +217,9 @@ abstract class Model extends Singleton
 				}else{
 					return call_user_func_array(array($this->db, $name), $arguments);
 				}
+				break;
+			case 'string':
+				return String::getInstance();
 				break;
 			default:
 				// Do nothing
