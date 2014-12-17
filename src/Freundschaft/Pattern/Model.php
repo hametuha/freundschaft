@@ -191,6 +191,9 @@ abstract class Model extends Singleton
 					return $this->db->prefix.$this->name;
 				}
 				break;
+			case 'string':
+				return String::getInstance();
+				break;
 			default:
 				return null;
 				break;
@@ -217,9 +220,6 @@ abstract class Model extends Singleton
 				}else{
 					return call_user_func_array(array($this->db, $name), $arguments);
 				}
-				break;
-			case 'string':
-				return String::getInstance();
 				break;
 			default:
 				// Do nothing

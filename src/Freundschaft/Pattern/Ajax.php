@@ -1,11 +1,17 @@
 <?php
 
 namespace Freundschaft\Pattern;
+use Freundschaft\Util\ModelAccessor;
+use Freundschaft\Util\String;
+use Freundschaft\Util\Input;
 
 /**
  * Ajax Base class
  *
  * @package Freundschaft\Pattern
+ * @property-read \Freundschaft\Util\String $string
+ * @property-read Input $input
+ * @property-read ModelAccessor $models
  */
 abstract class Ajax extends Singleton
 {
@@ -65,13 +71,13 @@ abstract class Ajax extends Singleton
 
 		}
 		// Set nonce action name with class name
-		$this->nonce = $this->decamelize(str_replace('\\', '_', get_called_class()));
+		$this->nonce = $this->string->decamelize(str_replace('\\', '_', get_called_class()));
 		// Add Ajax action
 		add_action('admin_init', array($this, 'adminInit'));
 		// Set script name
 		if( empty($this->script_name) ){
 			$class_name = explode('\\', get_called_class());
-			$this->script_name = str_replace('_', '-', $this->decamelize($class_name[count($class_name) - 1]));
+			$this->script_name = str_replace('_', '-', $this->string->decamelize($class_name[count($class_name) - 1]));
 		}
 		// Register scripts for front page
 		if( false !== array_search($this->screen, array('front', 'both', 'all')) ){
@@ -115,7 +121,7 @@ abstract class Ajax extends Singleton
 			'actions' => array(),
 		);
 		foreach( $this->methods as $method => $private ){
-			$method = preg_replace('/\Aajax_(nopriv_)?/', '', $this->decamelize($method));
+			$method = preg_replace('/\Aajax_(nopriv_)?/', '', $this->string->decamelize($method));
 			if( !isset($vars['actions'][$method]) ){
 				$vars['actions'][$method] = $method;
 			}
@@ -140,9 +146,42 @@ abstract class Ajax extends Singleton
 		if( defined('DOING_AJAX') && DOING_AJAX ){
 			// Fires only on Ajax
 			foreach( $this->methods as $method => $is_private ){
-				$key = 'wp_'.$this->decamelize($method);
+				$key = 'wp_'.$this->string->decamelize($method);
 				add_action($key, array($this, $method));
 			}
+		}
+	}
+
+	/**
+	 * Create nonce
+	 *
+	 * @return string
+	 */
+	protected function create_nonce(){
+		return wp_create_nonce($this->nonce);
+	}
+
+	/**
+	 * Getter
+	 *
+	 * @param string $name
+	 *
+	 * @return Singleton|null
+	 */
+	public function __get($name){
+		switch( $name ){
+			case 'string':
+				return String::getInstance();
+				break;
+			case 'input':
+				return Input::getInstance();
+				break;
+			case 'models':
+				return ModelAccessor::getInstance();
+				break;
+			default:
+				return null;
+				break;
 		}
 	}
 

@@ -16,10 +16,21 @@ class String extends Singleton
 	 *
 	 * @return string
 	 */
-	protected function decamelize($string){
+	public function decamelize($string){
 		return strtolower(preg_replace_callback('/(?<=.)([A-Z])/', function($match){
 			return '_'.strtolower($match[1]);
 		}, $string));
+	}
+
+	/**
+	 * Camelize
+	 *
+	 * @param $string
+	 *
+	 * @return string
+	 */
+	public function camelize($string){
+		return implode('', array_map('ucfirst', preg_split('/[_\-]/', $string)));
 	}
 
 }
