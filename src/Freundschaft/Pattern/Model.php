@@ -66,7 +66,7 @@ abstract class Model extends Singleton
 	 *
 	 * @return bool|\WP_Error
 	 */
-	public function test_setting(){
+	public function testSetting(){
 		$error = new \WP_Error();
 		// Trigger error if $columns is empty
 		if( empty($this->columns) ){
@@ -97,7 +97,7 @@ abstract class Model extends Singleton
 	 * @return false|int
 	 */
 	public function insert( array $values ){
-		$data = $this->get_value_and_where($values);
+		$data = $this->getValueAndWhere($values);
 		if( !empty($this->timestamp_on_create) ){
 			if( !isset($data['values'][$this->timestamp_on_create]) ){
 				// Add current time to values
@@ -117,7 +117,7 @@ abstract class Model extends Singleton
 	 * @return false|int
 	 */
 	public function update( array $values, array $where ){
-		$data = $this->get_value_and_where($values);
+		$data = $this->getValueAndWhere($values);
 		if( !empty($this->timestamp_on_update) ){
 			if( !isset($data['values'][$this->timestamp_on_update]) ){
 				// Add current time to values
@@ -125,7 +125,7 @@ abstract class Model extends Singleton
 				$data['wheres'][] = $this->columns[$this->timestamp_on_update];
 			}
 		}
-		$wheres = $this->get_value_and_where($where);
+		$wheres = $this->getValueAndWhere($where);
 		return $this->db->update($this->table, $data['values'], $wheres['values'], $data['wheres'], $wheres['wheres']);
 	}
 
@@ -137,7 +137,7 @@ abstract class Model extends Singleton
 	 * @return false|int
 	 */
 	public function delete( array $where ){
-		$wheres = $this->get_value_and_where($where);
+		$wheres = $this->getValueAndWhere($where);
 		return $this->db->delete($this->table, $wheres['values'], $wheres['wheres']);
 	}
 
@@ -150,7 +150,7 @@ abstract class Model extends Singleton
 	 * @return array ['values' => [], 'wheres' => []]
 	 * @throws \InvalidArgumentException
 	 */
-	protected function get_value_and_where( array $data ){
+	protected function getValueAndWhere( array $data ){
 		if( empty($data) ){
 			throw new \InvalidArgumentException('配列が空です。', 500);
 		}
