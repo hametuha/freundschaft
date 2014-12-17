@@ -2,7 +2,7 @@
  * Freundshaft JS
  */
 
-/*global Freundschaft: true*/
+/*global FreundschaftFollow: true*/
 
 (function ($) {
     'use strict';
@@ -20,8 +20,8 @@
         });
         // 投稿者IDがあればAjax
         if( authorIds.length ){
-            $.post(Freundschaft.endpoint, {
-                action: Freundschaft.action,
+            $.post(FreundschaftFollow.endpoint, {
+                action: FreundschaftFollow.actions.fs_status,
                 author_ids: authorIds
             }).done(function(result){
                 if( result.logged_in ){
@@ -63,8 +63,8 @@
             // 一時停止
             $btn.removeClass('fs-follow').addClass('fs-disabled');
             // Ajax
-            $.post(Freundschaft.endpoint, {
-                action: Freundschaft.action_follow,
+            $.post(FreundschaftFollow.endpoint, {
+                action: FreundschaftFollow.actions.fs_follow,
                 user_id: userId,
                 _wpnonce: nonce
             }).done(function(result){
@@ -85,8 +85,8 @@
             // 一時停止
             $btn.removeClass('fs-following').addClass('fs-disabled');
             // Ajax
-            $.post(Freundschaft.endpoint, {
-                action: Freundschaft.action_unfollow,
+            $.post(FreundschaftFollow.endpoint, {
+                action: FreundschaftFollow.actions.fs_unfollow,
                 user_id: userId,
                 _wpnonce: nonce
             }).done(function(result){
