@@ -75,5 +75,10 @@ spl_autoload_register(function( $class_name ){
  * プラグイン読み込み完了後に実行
  */
 add_action('plugins_loaded', function(){
+	// Ajaxコントローラーを初期化
 	Freundschaft\API\Ajax\Follow::getInstance();
+	// WP-CLIのコマンドを登録
+	if( defined('WP_CLI') && WP_CLI ){
+		WP_CLI::add_command('follow', 'Freundschaft\\Commands\\Follow');
+	}
 });
