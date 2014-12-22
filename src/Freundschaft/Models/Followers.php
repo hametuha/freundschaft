@@ -85,4 +85,62 @@ SQL;
 			'user_id' => $user_id,
 		));
 	}
+
+	/**
+	 * Get followers of specified user
+	 *
+	 * @param int $user_id
+	 * @param int $paged
+	 *
+	 * @return array
+	 */
+	public function getFollowers($user_id, $paged = 1){
+		// Get offset
+		$offset = (max(1, $paged) - 1) * $this->posts_per_page;
+		// Make query
+		$query = <<<SQL
+			SELECT u.*, f.created
+			FROM {$this->table} as f
+			INNER JOIN {$this->db->users} as u
+			ON f.follower_id = u.ID
+			WHERE f.user_id = %d
+			ORDER BY f.created DESC
+			LIMIT %d, %d
+SQL;
+		$return = array();
+		$result = $this->get_results($query, $user_id, $offset, $this->posts_per_page);
+		foreach( $result as $row ){
+			$return[] = new \WP_User($row);
+		}
+		return $return;
+	}
+
+	/**
+	 * Get followings
+	 *
+	 * @param int $user_id
+	 * @param int $paged
+	 *
+	 * @return array
+	 */
+	public function getFollowings($user_id, $paged = 1){
+		// Get offset
+		$offset = (max(1, $paged) - 1) * $this->posts_per_page;
+		// Make query
+		$query = <<<SQL
+			SELECT u.*, f.created
+			FROM {$this->table} as f
+			INNER JOIN {$this->db->users} as u
+			ON f.user_id = u.ID
+			WHERE f.follower_id = %d
+			ORDER BY f.created DESC
+			LIMIT %d, %d
+SQL;
+		$return = array();
+		$result = $this->get_results($query, $user_id, $offset, $this->posts_per_page);
+		foreach( $result as $row ){
+			$return[] = new \WP_User($row);
+		}
+		return $return;
+	}
 }

@@ -11,6 +11,7 @@ use Freundschaft\Util\String;
  * @property-read \wpdb $db
  * @property-read string $table
  * @property-read \Freundschaft\Util\String $string
+ * @property-read int $posts_per_page
  * @method int query(string $query) Do $wpdb->query with prepared statement.
  * @method array get_results(string $query) Do $wpdb->get_result with prepared statement.
  * @method null|\stdClass get_row(string $query) Do $wpdb->get_result with prepared statement.
@@ -194,6 +195,9 @@ abstract class Model extends Singleton
 			case 'string':
 				return String::getInstance();
 				break;
+			case 'posts_per_page':
+				return (int) get_option('posts_per_page');
+				break;
 			default:
 				return null;
 				break;
@@ -211,7 +215,7 @@ abstract class Model extends Singleton
 	public function __call($name, $arguments = array()){
 		switch( $name ){
 			case 'get_var':
-			case 'get_result':
+			case 'get_results':
 			case 'get_row':
 			case 'get_col':
 			case 'query':

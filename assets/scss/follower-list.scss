@@ -1,0 +1,31 @@
+@charset "UTF-8";
+@import "compass";
+
+.follower-list{
+  @include clearfix();
+  border-bottom: 1px solid #ddd;
+  padding: 0.5em;
+  &:first-child{
+    border-top: 1px solid #ddd;
+  }
+  .avatar{
+    float: left;
+    margin-right: 16px;
+  }
+  h3.follower-name{
+    font-size: 1.2em;
+    clear: none;
+    margin: 0 0 0.5em 90px;
+    small{
+      margin-left: 1em;
+      font-weight: normal;
+      color: #aaa;
+    }
+  }
+  .description{
+    margin-left: 90px;
+    p{
+       margin: 0.5em 0;
+    }
+  }
+}
