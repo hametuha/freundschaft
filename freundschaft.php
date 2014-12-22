@@ -64,6 +64,8 @@ add_action('admin_init', function(){
 		// Ajaxリクエストのときだけ実行
 		add_action('wp_ajax_nopriv_fs_status', '_freundschaft_not_logged_in');
 		add_action('wp_ajax_fs_status', '_freundschaft_logged_in');
+		add_action('wp_ajax_fs_follow', '_freundschaft_follow');
+		add_action('wp_ajax_fs_unfollow', '_freundschaft_unfollow');
 	}
 });
 
@@ -73,11 +75,11 @@ add_action('admin_init', function(){
 function _freundschaft_logged_in(){
 	$users = array();
 	if( isset($_POST['author_ids']) && is_array($_POST['author_ids'])){
-		foreach( array_unique($_POST['author_ids']) as $author_id ){
-			if( is_numeric($author_id) ){
-				// とりあえず全部true
-				$users['user_'.$author_id] = true;
-			}
+		$author_ids = array_unique($_POST['author_ids']);
+		$result = Freundschaft\Model\Followers::getInstance()->getFollowStatus(get_current_user_id(), $author_ids);
+		$users = array();
+		foreach( $result as $user_id => $bool ){
+			$users['user_'.$user_id] = $bool;
 		}
 	}
 	wp_send_json(array(
@@ -98,6 +100,66 @@ function _freundschaft_not_logged_in(){
 	));
 }
 
+/**
+ * フォローする
+ */
+function _freundschaft_follow(){
+	$json = array(
+		'success' => false,
+		'message' => '',
+	);
+	try{
+		// nonceをチェック
+		if( !isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'freundschaft')){
+			throw new Exception('不正な遷移です。', 500);
+		}
+		// ユーザーIDをチェック
+		if( !isset($_POST['user_id']) || !is_numeric($_POST['user_id']) ){
+			throw new Exception('ユーザーIDが指定されていません。', 500);
+		}
+		if( !Freundschaft\Model\Followers::getInstance()->follow(get_current_user_id(), $_POST['user_id']) ){
+			throw new Exception('すでにフォローしています。', 500);
+		}
+		$json = array(
+			'success' => true,
+			'message' => 'フォローしました',
+		);
+	}catch ( Exception $e ){
+		$json['message'] = $e->getMessage();
+	}
+	wp_send_json($json);
+}
+
+
+/**
+ * フォロー解除
+ */
+function _freundschaft_unfollow(){
+	$json = array(
+		'success' => false,
+		'message' => '',
+	);
+	try{
+		// nonceをチェック
+		if( !isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'freundschaft')){
+			throw new Exception('不正な遷移です。', 500);
+		}
+		// ユーザーIDをチェック
+		if( !isset($_POST['user_id']) || !is_numeric($_POST['user_id']) ){
+			throw new Exception('ユーザーIDが指定されていません。', 500);
+		}
+		if( !Freundschaft\Model\Followers::getInstance()->unfollow(get_current_user_id(), $_POST['user_id']) ){
+			throw new Exception('このユーザーをフォローしていません。', 500);
+		}
+		$json = array(
+			'success' => true,
+			'message' => 'フォローしました',
+		);
+	}catch ( Exception $e ){
+		$json['message'] = $e->getMessage();
+	}
+	wp_send_json($json);
+}
 
 /**
  * JSとCSSを読み込み
@@ -113,7 +175,25 @@ add_action('wp_enqueue_scripts', function(){
 	wp_localize_script('freundschaft', 'Freundschaft', array(
 		'endpoint' => admin_url('admin-ajax.php'),
 		'action' => 'fs_status',
+		'action_follow' => 'fs_follow',
+		'action_unfollow' => 'fs_unfollow',
 	));
 	// CSSを読み込み。
 	wp_enqueue_style('freundschaft', $assets_url.'/css/freundschaft.css', array(), $asset_version);
+});
+
+
+/**
+ * オートローダーを登録
+ */
+spl_autoload_register(function( $class_name ){
+	$class_name = ltrim($class_name, '\\');
+	if( 0 === strpos($class_name, 'Freundschaft\\') ){
+		// 名前空間がFreundschaftだったら
+		$path = __DIR__.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.
+		        str_replace('\\', DIRECTORY_SEPARATOR, $class_name).'.php';
+		if( file_exists($path) ){
+			require $path;
+		}
+	}
 });
