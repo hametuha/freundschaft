@@ -9,7 +9,6 @@ Author URI: http://hametuha.co.jp
 License: GPL2 or Later
 */
 
-
 /**
  * データベースの作成
  */
@@ -77,6 +76,8 @@ spl_autoload_register(function( $class_name ){
 add_action('plugins_loaded', function(){
 	// Ajaxコントローラーを初期化
 	Freundschaft\API\Ajax\Follow::getInstance();
+	// フォロワーリストを初期化
+	Freundschaft\Controllers\FollowerList::getInstance();
 	// WP-CLIのコマンドを登録
 	if( defined('WP_CLI') && WP_CLI ){
 		WP_CLI::add_command('follow', 'Freundschaft\\Commands\\Follow');
