@@ -1,21 +1,29 @@
 <?php
 
-namespace Freundschaft\Model;
+namespace Freundschaft\Models;
 
-use Freundschaft\Pattern\Singleton;
+use Freundschaft\Pattern\Model;
 
 
 /**
  * Followers Model
  *
  * @package Freundschaft\Model
- * @property-read \wpdb $db
- * @property-read string $table
  */
-class Followers extends Singleton
+class Followers extends Model
 {
+
+
+	protected $columns = array(
+		'follower_id' => '%d',
+		'user_id' => '%d',
+		'created' => '%s',
+	);
+
+	protected $timestamp_on_create = 'created';
+
 	/**
-	 * Get following status of
+	 * Get following status of specified user ids
 	 *
 	 * @param int $follower_id
 	 * @param array $user_ids
@@ -36,7 +44,7 @@ class Followers extends Singleton
 			  AND  user_id in ({$where_in})
 SQL;
 		// Get result as array
-		$result = $this->db->get_col($this->db->prepare($query, $follower_id));
+		$result = $this->get_col($query, $follower_id);
 		// Make return array['user_id' => true|false]
 		$return = array();
 		foreach( $user_ids as $user_id){
@@ -57,11 +65,10 @@ SQL;
 	 * @return bool
 	 */
 	public function follow($follower_id, $user_id){
-		return (bool) $this->db->insert($this->table, array(
+		return (bool) $this->insert(array(
 			'follower_id' => $follower_id,
 			'user_id' => $user_id,
-			'created' => current_time('mysql'),
-		), array('%d', '%d', '%s'));
+		));
 	}
 
 	/**
@@ -73,32 +80,9 @@ SQL;
 	 * @return bool
 	 */
 	public function unfollow($follower_id, $user_id){
-		return (bool) $this->db->delete($this->table, array(
+		return (bool) $this->delete(array(
 			'follower_id' => $follower_id,
 			'user_id' => $user_id,
-		), array('%d', '%d'));
+		));
 	}
-
-	/**
-	 * Getter
-	 *
-	 * @param string $name
-	 *
-	 * @return null
-	 */
-	public function __get( $name ){
-		switch( $name ){
-			case 'db':
-				global $wpdb;
-				return $wpdb;
-				break;
-			case 'table':
-				return $this->db->prefix.'followers';
-				break;
-			default:
-				return null;
-				break;
-		}
-	}
-
 }
