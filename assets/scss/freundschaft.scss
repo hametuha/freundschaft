@@ -1,0 +1,71 @@
+@charset "UTF-8";
+
+@import "compass";
+
+$disabled-color: #999;
+$active-color: #0074a2;
+$negative-color: #d54e21;
+
+// 共通
+.fs-btn{
+  display: inline-block;
+  font-size: 0.85em;
+  border-width: 1px !important;
+  border-style: solid !important;
+  @include border-radius(2px);
+  padding: 0.25em 0.5em;
+  &:link, &:visited{
+    text-decoration: none;
+  }
+  &:hover, &:active{
+    text-decoration: none;
+  }
+
+}
+
+// 未使用時
+.fs-disabled{
+  border-color: $disabled-color !important;
+  &:link, &:visited, &:hover, &:active{
+    color: $disabled-color;
+    background-color: white;
+    cursor: not-allowed;
+  }
+}
+
+// ログインリンク, フォローリンク
+.fs-login, .fs-follow{
+  border-color: $active-color !important;
+  &:link, &:visited{
+    color: white;
+    background-color: $active-color;
+  }
+  &:hover, &:active{
+    color: white;
+    background-color: lighten($active-color, 10);
+  }
+}
+
+// フォロー中
+.fs-following{
+  span{
+    display: none;
+  }
+  border-color: $active-color !important;
+  &:before{
+    display: inline-block;
+    content: 'フォロー中';
+  }
+  &:link, &:visited{
+    background-color: white;
+    color: $active-color;
+  }
+  &:hover, &:active{
+    &:before{
+      content: "フォロー解除";
+    }
+    background-color: $negative-color;
+    color: white;
+    border-color: $negative-color !important;
+  }
+}
