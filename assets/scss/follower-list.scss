@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @import "compass";
 
+// フォロワーリスト
 .follower-list{
   @include clearfix();
   border-bottom: 1px solid #ddd;
@@ -27,5 +28,60 @@
     p{
        margin: 0.5em 0;
     }
+  }
+}
+
+// もっとフォロワーを読み込むボタン
+a.fs-more-btn{
+  display: block;
+  padding: 0.5em 1em;
+  text-align: center;
+  border: 1px solid transparent !important;
+  @include border-radius(2px);
+  margin: 0.5em 0;
+  transition: margin 0.2s linear, opacity 0.2s linear;
+  &:link, &:visited{
+    text-decoration: none;
+    border-color: #444 !important;
+    color: #666;
+    background-color: #fff;
+  }
+  &:hover, &:active{
+    text-decoration: none;
+    border-color: lighten(#444, 20) !important;
+    color: lighten(#666, 20);
+    background-color: #f9f9f9;
+  }
+  &:after{
+    @include opacity(0);
+  }
+  // 読み込み中
+  &.loading{
+    color: #aaa;
+    border-color: #ccc !important;
+    background: #f0f0f0;
+    margin-top: 100px;
+    position: relative;
+    cursor: not-allowed;
+    &:after{
+      @include opacity(1);
+      position: absolute;
+      content: '';
+      background: url("../img/loader.gif") center top no-repeat;
+      display: block;
+      height: 80px;
+      width: 100%;
+      left: 0;
+      top: -80px;
+    }
+  }
+}
+
+// フォロワーがいないメッセージが出ていたら、
+// ボタンを消す
+p.no-followers{
+  color: #ccc;
+  & + a.fs-more-btn{
+    display: none;
   }
 }
