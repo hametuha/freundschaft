@@ -7,13 +7,19 @@
 (function ($) {
     'use strict';
 
-    // ボタンの初期値
-    var $btns, nonce = '';
+    // いろんなイベントを渡って使う変数を記録
+    var nonce = '',
+        loggedIn;
 
-    $(window).ready(function(){
-        // DOM READYでボタンを取得
-        $btns = $('.fs-btn');
-        var authorIds = [];
+    // documentオブジェクトを監視
+    $(document).on('rendered.freundschaft', function(){
+        var $btns = $('.fs-disabled'), // disabledが未確認のボタンをこの時点で取得
+            authorIds = [];
+        // ログインしていないことをすでに確認済みだったら、
+        // ログインボタンに変更
+        if( false === loggedIn ){
+            $btns.removeClass('fs-disabled').addClass('fs-login');
+        }
         // ボタン全部の投稿者IDを取得して、ログイン判定
         $btns.each(function(index, btn){
             authorIds.push($(btn).attr('data-author-id'));
@@ -44,11 +50,18 @@
                     // ログインしていないので、
                     // ボタンをログインに
                     $btns.removeClass('fs-disabled').addClass('fs-login');
+                    // ログインチェックを記録
+                    loggedIn = false;
                 }
             }).fail(function(xhr, status, message){
                 alert(message);
             });
         }
+    });
+
+    // DOMREADYでイベント発行
+    $(window).ready(function(){
+        $(document).trigger('rendered.freundschaft');
     });
 
 
@@ -118,6 +131,8 @@
                 $btn.before(result.html);
                 // オフセットを更新
                 $btn.attr('data-offset', result.offset);
+                // ボタンの更新イベント
+                $(document).trigger('rendered.freundschaft');
             }).fail(function(xhr, status, error){
                 alert(error);
             }).always(function(){
