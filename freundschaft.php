@@ -87,5 +87,6 @@ add_action('plugins_loaded', function(){
 	// WP-CLIのコマンドを登録
 	if( defined('WP_CLI') && WP_CLI ){
 		WP_CLI::add_command('follow', 'Freundschaft\\Commands\\Follow');
+		WP_CLI::add_command('lonely-users', 'Freundschaft\\Commands\\NoFollow');
 	}
 });

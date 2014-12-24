@@ -94,6 +94,36 @@ SQL;
 	}
 
 	/**
+	 * Get follower count
+	 *
+	 * @param int $user_id
+	 *
+	 * @return int
+	 */
+	public function followerCount($user_id){
+		$query = <<<SQL
+			SELECT COUNT(follower_id) FROM {$this->table}
+			WHERE user_id = %d
+SQL;
+		return (int) $this->get_var($query, $user_id);
+	}
+
+	/**
+	 * Get following count
+	 *
+	 * @param int $follower_id
+	 *
+	 * @return int
+	 */
+	public function followingCount($follower_id){
+		$query = <<<SQL
+			SELECT COUNT(user_id) FROM {$this->table}
+			WHERE follower_id = %d
+SQL;
+		return (int) $this->get_var($query, $follower_id);
+	}
+
+	/**
 	 * Get followers of specified user
 	 *
 	 * @param int $user_id
@@ -149,6 +179,26 @@ SQL;
 			$return[] = new \WP_User($row);
 		}
 		return $return;
+	}
+
+	/**
+	 * Get users who follows none
+	 *
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
+	public function getLonelyUsers($limit = 10){
+		$limit = absint($limit);
+		$query = <<<SQL
+			SELECT u.ID, u.display_name FROM {$this->db->users} AS u
+			WHERE ID NOT IN (
+				SELECT follower_id FROM {$this->table}
+				GROUP BY follower_id
+			)
+			LIMIT %d
+SQL;
+		return $this->get_results($query, $limit);
 	}
 
 	/**

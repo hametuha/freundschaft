@@ -25,6 +25,11 @@ class Follow extends \WP_CLI_Command
 	 * @synopsis
 	 */
 	public function __invoke( $args, $assoc_args ) {
+		if( !WP_DEBUG ){
+			// DEBUGモードでなければ終了
+			\WP_CLI::error('このコマンドはデバッグ環境でしか利用できません');
+			exit;
+		}
 		// モデルを取得。コードヒントが出るように
 		/** @var Followers $followers */
 		$followers = Followers::getInstance();

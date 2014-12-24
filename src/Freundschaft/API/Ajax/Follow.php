@@ -61,6 +61,13 @@ class Follow extends Ajax
 			if( !$this->models->followers->follow(get_current_user_id(), $_POST['user_id']) ){
 				throw new \Exception('すでにフォローしています。', 500);
 			}
+			/**
+			 * freundschaft_follow
+			 *
+			 * @param int $follower_id
+			 * @param int $user_id
+			 */
+			do_action('freundschaft_follow', get_current_user_id(), (int)$this->input->post('user_id'));
 			$json = array(
 				'success' => true,
 				'message' => 'フォローしました',
