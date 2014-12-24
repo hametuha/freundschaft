@@ -18,7 +18,7 @@ npm install
 
 While you're working on your project, run:
 
-`grunt`
+`grunt watch`
 
 And you're set!
 

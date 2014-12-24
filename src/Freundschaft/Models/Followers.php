@@ -22,6 +22,13 @@ class Followers extends Model
 
 	protected $timestamp_on_create = 'created';
 
+
+	protected function __construct( array $settings = array() ) {
+		parent::__construct( $settings );
+		add_action('delete_user', array($this, 'deleteUser'));
+	}
+
+
 	/**
 	 * Get following status of specified user ids
 	 *
@@ -142,5 +149,18 @@ SQL;
 			$return[] = new \WP_User($row);
 		}
 		return $return;
+	}
+
+	/**
+	 * Delete user record
+	 *
+	 * @param int $user_id
+	 *
+	 * @return int
+	 */
+	public function deleteUser($user_id){
+		$following = (int) $this->delete(array('follower_id' => $user_id));
+		$follower  = (int) $this->delete(array('user_id' => $user_id));
+		return $follower + $following;
 	}
 }
