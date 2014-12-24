@@ -202,6 +202,24 @@ SQL;
 	}
 
 	/**
+	 * Detect if 2 users follow each other
+	 *
+	 * @param int $user_id_1
+	 * @param int $user_id_2
+	 *
+	 * @return bool
+	 */
+	public function followingEachOther($user_id_1, $user_id_2){
+		$query = <<<SQL
+			SELECT count(*) FROM {$this->table}
+			WHERE (follower_id = %d AND user_id = %d)
+			   OR (follower_id = %d AND user_id = %d)
+SQL;
+		return 2 === (int) $this->get_var($query, $user_id_1, $user_id_2, $user_id_2, $user_id_1);
+
+	}
+
+	/**
 	 * Delete user record
 	 *
 	 * @param int $user_id
