@@ -104,4 +104,27 @@
         }
     });
 
+    // フォロワーをもっと読み込むボタン
+    $(document).on('click', '.fs-more-btn', function(e){
+        e.preventDefault();
+        var $btn = $(this),
+            endpoint = $btn.attr('href') + '&offset=' + $btn.attr('data-offset');
+        // 読み込み中は何もしない
+        if( !$btn.hasClass('loading') ){
+            // 読み込み中に変更
+            $btn.addClass('loading');
+            $.get(endpoint).done(function(result){
+                // HTMLを挿入
+                $btn.before(result.html);
+                // オフセットを更新
+                $btn.attr('data-offset', result.offset);
+            }).fail(function(xhr, status, error){
+                alert(error);
+            }).always(function(){
+                // 読み込み中を解除
+                $btn.removeClass('loading');
+            });
+        }
+    });
+
 })(jQuery);

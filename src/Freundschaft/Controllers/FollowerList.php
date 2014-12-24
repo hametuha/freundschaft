@@ -21,6 +21,7 @@ class FollowerList extends Controller
 	protected function __construct( array $settings = array() ) {
 		add_filter('the_content', array($this, 'theContent'));
 		add_action('wp_enqueue_scripts', array($this, 'enqueueAssets'));
+		add_action('wp_ajax_fs_follower_list', array($this, 'ajaxFollowerList'));
 	}
 
 	/**
@@ -32,9 +33,9 @@ class FollowerList extends Controller
 	 */
 	public function theContent($content){
 		if( is_page($this->followers) ){
-			return $this->getFollowersList();
+			return $this->getFollowersList('follower', true);
 		}elseif( is_page($this->following) ){
-			return $this->getFollowingList();
+			return $this->getFollowersList('following', true);
 		}else{
 			return $content;
 		}
@@ -50,30 +51,63 @@ class FollowerList extends Controller
 	/**
 	 * Get followers list
 	 *
-	 * @return string
 	 */
-	protected function getFollowersList(){
-		$followers = $this->models->followers->getFollowers(get_current_user_id());
-		if( empty($followers) ){
-			return '<p class="error">ユーザーは見つかりませんでした。</p>';
+	public function ajaxFollowerList(){
+		$offset = absint($this->input->get('offset'));
+		$type = (string)$this->input->get('type');
+		if( 'following' == $type ){
+			$html = $this->getFollowersList('following', false, $offset);
 		}else{
-			return $this->renderUserList($followers, 'follower');
+			$html = $this->getFollowersList('follower', false, $offset);
 		}
+		wp_send_json(array(
+			'offset' => $offset + 1,
+			'html' => $html,
+		));
 	}
 
 	/**
-	 * Get followings list
+	 * Get followers list
+	 *
+	 * @param string $type
+	 * @param bool $with_more_button
+	 * @return string
+	 */
+	protected function getFollowersList($type = 'follower', $with_more_button = false, $paged = 1){
+		if( 'following' == $type ){
+			$followers = $this->models->followers->getFollowings(get_current_user_id(), $paged);
+		}else{
+			$followers = $this->models->followers->getFollowers(get_current_user_id(), $paged);
+		}
+		// Get list
+		$output = empty($followers) ? '' : $this->renderUserList($followers, 'follower');
+		// If list is not empty and need more button,
+		// append it.
+		if( $output && $with_more_button ){
+			$output .= $this->more_button($type);
+		}
+		// If $output is still empty, it means no followers.
+		if( !$output ){
+			$output = '<p class="no-followers">ユーザーは見つかりませんでした。</p>';
+		}
+		return $output;
+	}
+
+	/**
+	 * Get more button
+	 *
+	 * @param string $type
 	 *
 	 * @return string
 	 */
-	protected function getFollowingList(){
-		$followers = $this->models->followers->getFollowings(get_current_user_id());
-		if( empty($followers) ){
-			return '<p class="error">ユーザーは見つかりませんでした。</p>';
-		}else{
-			return $this->renderUserList($followers, 'follower');
-		}
+	protected function more_button($type = 'follower'){
+		$view = $this->getView('follow-more');
+		$url = esc_url(admin_url('admin-ajax.php?action=fs_follower_list&type='.$type));
+		ob_start();
+		include $view;
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
 	}
-
 
 }

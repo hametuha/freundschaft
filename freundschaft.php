@@ -48,10 +48,14 @@ SQL;
 
 /**
  * フォローボタンを出力する
+ *
+ * @param int $author_id 指定しなければ現在の投稿者のID
  */
-function freundschaft_btn(){
+function freundschaft_btn($author_id = null){
 	$redirect_to = get_permalink();
-	$author_id = get_the_author_meta('ID');
+	if( is_null($author_id) ){
+		$author_id = get_the_author_meta('ID');
+	}
 	printf('<a class="fs-btn fs-disabled" data-author-id="%d" href="%s"><span>フォローする</span></a>', $author_id, wp_login_url($redirect_to));
 }
 
