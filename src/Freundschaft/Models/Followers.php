@@ -231,4 +231,43 @@ SQL;
 		$follower  = (int) $this->delete(array('user_id' => $user_id));
 		return $follower + $following;
 	}
+
+	/**
+	 * Get recommended users list
+	 *
+	 * @param int $limit
+	 *
+	 * @return array Array of \WP_User
+	 */
+	public function getRecommendedUsers($limit = 10){
+		$cache_key = 'freundschaft_recommended_users';
+		// Get cache
+		$result = get_transient($cache_key);
+		if( false === $result ){
+			// No cache. Query to DB
+			$query = <<<SQL
+				SELECT * FROM (
+					SELECT user_id, COUNT(follower_id) as score
+					FROM {$this->table}
+					GROUP BY user_id
+					ORDER BY score
+					LIMIT %d
+				) AS f
+				INNER JOIN {$this->db->users} AS u
+				ON f.user_id = u.ID
+				LIMIT %d
+SQL;
+			// Get MySQL rows
+			$result = $this->get_results($query, $limit * 2, $limit);
+			// Save Cache.
+			set_transient($cache_key, $result, 60 * 60 * 2);
+		}
+		// Convert them to WP_User
+		$return = array();
+		foreach( $result as $row ){
+			$row->created = $row->user_registered;
+			$return[] = new \WP_User($row);
+		}
+		return $return;
+	}
 }

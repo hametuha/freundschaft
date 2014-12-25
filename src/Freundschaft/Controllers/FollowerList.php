@@ -120,7 +120,9 @@ class FollowerList extends Controller
 	 * @return string
 	 */
 	public function followNone(){
-		return '誰もフォローしていません';
+		$users = $this->models->followers->getRecommendedUsers(10);
+		return '<p class="fs-recommend">誰もフォローしていません。この人たちをフォローしてみましょう。</p>'
+		       .$this->renderUserList($users, 'follower');
 	}
 
 }
