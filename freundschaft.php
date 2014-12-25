@@ -82,8 +82,11 @@ add_action('plugins_loaded', function(){
 	Freundschaft\API\Ajax\Follow::getInstance();
 	// フォロワーリストを初期化
 	Freundschaft\Controllers\FollowerList::getInstance();
+	// モデルを初期化
+	Freundschaft\Models\Followers::getInstance();
 	// WP-CLIのコマンドを登録
 	if( defined('WP_CLI') && WP_CLI ){
 		WP_CLI::add_command('follow', 'Freundschaft\\Commands\\Follow');
+		WP_CLI::add_command('lonely-users', 'Freundschaft\\Commands\\NoFollow');
 	}
 });

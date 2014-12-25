@@ -35,7 +35,11 @@ class FollowerList extends Controller
 		if( is_page($this->followers) ){
 			return $this->getFollowersList('follower', true);
 		}elseif( is_page($this->following) ){
-			return $this->getFollowersList('following', true);
+			if( $this->models->followers->followingCount(get_current_user_id()) ){
+				return $this->getFollowersList('following', true);
+			}else{
+				return $this->followNone();
+			}
 		}else{
 			return $content;
 		}
@@ -108,6 +112,17 @@ class FollowerList extends Controller
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;
+	}
+
+	/**
+	 * Get user list for lonely user
+	 *
+	 * @return string
+	 */
+	public function followNone(){
+		$users = $this->models->followers->getRecommendedUsers(10);
+		return '<p class="fs-recommend">誰もフォローしていません。この人たちをフォローしてみましょう。</p>'
+		       .$this->renderUserList($users, 'follower');
 	}
 
 }

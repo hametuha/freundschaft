@@ -2,10 +2,10 @@
  * Freundshaft JS
  */
 
-/*global FreundschaftFollow: true*/
-
 (function ($) {
     'use strict';
+
+    console.log('hoge');
 
     // いろんなイベントを渡って使う変数を記録
     var nonce = '',
@@ -83,13 +83,13 @@
             }).done(function(result){
                 if( result.success ){
                     // 成功
-                    $btn.removeClass('fs-disabled').addClass('fs-following')
+                    $btn.removeClass('fs-disabled').addClass('fs-following');
                 }else{
                     // 失敗
                     $btn.removeClass('fs-disabled').addClass('fs-follow');
                     alert(result.message);
                 }
-            }).fail(function(xhr, status, error){
+            }).fail(function(){
                 $btn.removeClass('fs-disabled').addClass('fs-follow');
             });
         }else if( $btn.hasClass('fs-following') ){
@@ -105,13 +105,13 @@
             }).done(function(result){
                 if( result.success ){
                     // 成功
-                    $btn.removeClass('fs-disabled').addClass('fs-follow')
+                    $btn.removeClass('fs-disabled').addClass('fs-follow');
                 }else{
                     // 失敗
                     $btn.removeClass('fs-disabled').addClass('fs-following');
                     alert(result.message);
                 }
-            }).fail(function(xhr, status, error){
+            }).fail(function(){
                 $btn.removeClass('fs-disabled').addClass('fs-following');
             });
         }

@@ -22,6 +22,13 @@ class Followers extends Model
 
 	protected $timestamp_on_create = 'created';
 
+
+	protected function __construct( array $settings = array() ) {
+		parent::__construct( $settings );
+		add_action('delete_user', array($this, 'deleteUser'));
+	}
+
+
 	/**
 	 * Get following status of specified user ids
 	 *
@@ -87,6 +94,36 @@ SQL;
 	}
 
 	/**
+	 * Get follower count
+	 *
+	 * @param int $user_id
+	 *
+	 * @return int
+	 */
+	public function followerCount($user_id){
+		$query = <<<SQL
+			SELECT COUNT(follower_id) FROM {$this->table}
+			WHERE user_id = %d
+SQL;
+		return (int) $this->get_var($query, $user_id);
+	}
+
+	/**
+	 * Get following count
+	 *
+	 * @param int $follower_id
+	 *
+	 * @return int
+	 */
+	public function followingCount($follower_id){
+		$query = <<<SQL
+			SELECT COUNT(user_id) FROM {$this->table}
+			WHERE follower_id = %d
+SQL;
+		return (int) $this->get_var($query, $follower_id);
+	}
+
+	/**
 	 * Get followers of specified user
 	 *
 	 * @param int $user_id
@@ -139,6 +176,96 @@ SQL;
 		$return = array();
 		$result = $this->get_results($query, $user_id, $offset, $this->posts_per_page);
 		foreach( $result as $row ){
+			$return[] = new \WP_User($row);
+		}
+		return $return;
+	}
+
+	/**
+	 * Get users who follows none
+	 *
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
+	public function getLonelyUsers($limit = 10){
+		$limit = absint($limit);
+		$query = <<<SQL
+			SELECT u.ID, u.user_login, u.display_name FROM {$this->db->users} AS u
+			WHERE ID NOT IN (
+				SELECT follower_id FROM {$this->table}
+				GROUP BY follower_id
+			)
+			LIMIT %d
+SQL;
+		return $this->get_results($query, $limit);
+	}
+
+	/**
+	 * Detect if 2 users follow each other
+	 *
+	 * @param int $user_id_1
+	 * @param int $user_id_2
+	 *
+	 * @return bool
+	 */
+	public function followingEachOther($user_id_1, $user_id_2){
+		$query = <<<SQL
+			SELECT count(*) FROM {$this->table}
+			WHERE (follower_id = %d AND user_id = %d)
+			   OR (follower_id = %d AND user_id = %d)
+SQL;
+		return 2 === (int) $this->get_var($query, $user_id_1, $user_id_2, $user_id_2, $user_id_1);
+
+	}
+
+	/**
+	 * Delete user record
+	 *
+	 * @param int $user_id
+	 *
+	 * @return int
+	 */
+	public function deleteUser($user_id){
+		$following = (int) $this->delete(array('follower_id' => $user_id));
+		$follower  = (int) $this->delete(array('user_id' => $user_id));
+		return $follower + $following;
+	}
+
+	/**
+	 * Get recommended users list
+	 *
+	 * @param int $limit
+	 *
+	 * @return array Array of \WP_User
+	 */
+	public function getRecommendedUsers($limit = 10){
+		$cache_key = 'freundschaft_recommended_users';
+		// Get cache
+		$result = get_transient($cache_key);
+		if( false === $result ){
+			// No cache. Query to DB
+			$query = <<<SQL
+				SELECT * FROM (
+					SELECT user_id, COUNT(follower_id) as score
+					FROM {$this->table}
+					GROUP BY user_id
+					ORDER BY score
+					LIMIT %d
+				) AS f
+				INNER JOIN {$this->db->users} AS u
+				ON f.user_id = u.ID
+				LIMIT %d
+SQL;
+			// Get MySQL rows
+			$result = $this->get_results($query, $limit * 2, $limit);
+			// Save Cache.
+			set_transient($cache_key, $result, 60 * 60 * 2);
+		}
+		// Convert them to WP_User
+		$return = array();
+		foreach( $result as $row ){
+			$row->created = $row->user_registered;
 			$return[] = new \WP_User($row);
 		}
 		return $return;
