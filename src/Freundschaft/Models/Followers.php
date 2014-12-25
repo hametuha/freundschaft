@@ -191,7 +191,7 @@ SQL;
 	public function getLonelyUsers($limit = 10){
 		$limit = absint($limit);
 		$query = <<<SQL
-			SELECT u.ID, u.display_name FROM {$this->db->users} AS u
+			SELECT u.ID, u.user_login, u.display_name FROM {$this->db->users} AS u
 			WHERE ID NOT IN (
 				SELECT follower_id FROM {$this->table}
 				GROUP BY follower_id

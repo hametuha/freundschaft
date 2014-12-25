@@ -31,7 +31,7 @@ class NoFollow extends \WP_CLI_Command
 		$users = $followers->getLonelyUsers(10);
 		if( $users ){
 			foreach( $users as $user ){
-				\WP_CLI::line(sprintf("%d\t%s", $user->ID, $user->display_name));
+				\WP_CLI::line(sprintf("%d\t%s\t\t%s", $user->ID, $user->user_login, $user->display_name));
 			}
 			\WP_CLI::error(sprintf('At least, %d users are lonely...', count($users)));
 		}else{
